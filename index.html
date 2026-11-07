@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Secret Santa draw</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎁</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9EFEA; --surface:#F8FAF7; --ink:#14302A; --muted:#4E675E; --line:#C3D2C8;
+  --accent:#B3202C; --accent-ink:#FFFFFF; --gold:#9A6F17;
+  --slip:#FFFFFF; --slip-ink:#14302A;
+  --display:"Caprasimo", "Cooper Black", Georgia, serif;
+  --body:"Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0F231E; --surface:#16312A; --ink:#E7F0EA; --muted:#9BB4A9; --line:#2B4B42;
+    --accent:#E2505B; --accent-ink:#1A0A0C; --gold:#E3B557;
+    --slip:#F6F2E8; --slip-ink:#14302A;
+    color-scheme: dark;
+  }
+}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:560px;margin:0 auto;padding:40px 20px 64px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(44px,12vw,72px);line-height:.95;margin:0 0 14px;letter-spacing:-.01em}
+h2{font-size:20px;font-weight:700;margin:0 0 12px}
+.lede{color:var(--muted);margin:0 0 28px;max-width:44ch}
+section{margin-bottom:32px}
+button:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn{font:inherit;font-weight:700;font-size:18px;border:0;border-radius:999px;padding:16px 28px;background:var(--accent);color:var(--accent-ink);cursor:pointer;width:100%}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.quiet{background:transparent;color:var(--ink);border:1.5px solid var(--line);font-size:15px;padding:9px 16px;width:auto;font-weight:600}
+.btn.quiet:hover{border-color:var(--ink)}
+.hint{font-size:14px;color:var(--muted);margin:10px 0 0}
+.err{color:var(--accent);font-weight:600}
+label{display:block;font-weight:600;font-size:15px;margin:16px 0 6px}
+label small{font-weight:400;color:var(--muted)}
+textarea,input[type=text]{width:100%;font:inherit;font-size:16px;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
+textarea{min-height:200px;resize:vertical}
+.actions{margin-top:20px}
+.links{list-style:none;padding:0;margin:0 0 16px;border-top:1px solid var(--line)}
+.links li{display:flex;align-items:center;gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}
+.links .who{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.links .who small{display:block;font-weight:400;font-size:13px;color:var(--muted)}
+.links li.sent .who small{color:var(--accent)}
+.warn{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:15px;color:var(--muted);margin-bottom:18px}
+.linkbtn{font:inherit;font-size:14px;background:none;border:0;color:var(--accent);cursor:pointer;text-decoration:underline;padding:4px 0}
+.tagwrap{position:relative;padding:10px 0 4px;margin-bottom:22px}
+.tag{position:relative;background:var(--slip);color:var(--slip-ink);padding:26px 28px 26px 64px;
+  clip-path:polygon(36px 0,100% 0,100% 100%,36px 100%,0 50%);filter:drop-shadow(0 10px 18px rgba(0,0,0,.18))}
+.tag::before{content:"";position:absolute;left:22px;top:50%;width:16px;height:16px;margin-top:-8px;border-radius:50%;background:var(--bg);box-shadow:inset 0 0 0 2px rgba(0,0,0,.12)}
+.tag .for,.tag .from{font-size:15px;margin:0 0 6px;opacity:.72}
+.tag .from{margin:10px 0 0;font-size:14px}
+.reel{height:64px;overflow:hidden;border-radius:6px}
+.reel.closed{background:repeating-linear-gradient(-45deg,rgba(179,32,44,.22) 0 10px,transparent 10px 20px)}
+.reel.closed .strip{visibility:hidden}
+.strip{will-change:transform}
+.strip div{height:64px;line-height:64px;font-family:var(--display);font-size:clamp(32px,9vw,46px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.note{color:var(--muted);margin:-12px 0 24px}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion: reduce){.strip{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Secret Santa</h1>
+
+  <div id="organizer" hidden>
+    <p class="lede">Make the draw here, then send each person their own private link. Nobody needs an account, and you won’t see who anyone got.</p>
+    <section id="setup">
+      <label for="people">Participants <small>(one name per line, at least 3)</small></label>
+      <textarea id="people" placeholder="Anna&#10;Tomek&#10;Kasia&#10;Piotr"></textarea>
+      <label for="note">Note for everyone <small>(optional, e.g. budget and date)</small></label>
+      <input type="text" id="note" maxlength="200" placeholder="Budget 100 zł, exchange on 24 December">
+      <label for="base">Page address <small>(where this page is hosted)</small></label>
+      <input type="text" id="base" placeholder="https://your-site.netlify.app/">
+      <div class="actions"><button class="btn" id="make">Make the draw</button></div>
+      <p class="err" id="err" hidden></p>
+    </section>
+    <section id="out" hidden>
+      <h2>Send these links</h2>
+      <div class="warn">Send each person only their own link, and don’t open other people’s links yourself, or you’ll see who they drew. Your own link is in the list too.</div>
+      <ul class="links" id="links"></ul>
+      <button class="linkbtn" id="redo">Start over with a new draw</button>
+    </section>
+  </div>
+
+  <div id="person" hidden>
+    <p class="lede" id="hello"></p>
+    <p class="note" id="pnote" hidden></p>
+    <div class="tagwrap">
+      <div class="tag">
+        <p class="for">You’re buying a gift for</p>
+        <div class="reel closed" id="reel"><div class="strip" id="strip"></div></div>
+        <p class="from" id="from"></p>
+      </div>
+    </div>
+    <button class="btn" id="drawBtn">Draw my person</button>
+    <p class="hint" id="after" hidden>Keep it to yourself. This link always shows the same person, so you can open it again any time.</p>
+  </div>
+
+  <div id="bad" hidden>
+    <p class="lede">This link looks incomplete. Ask the organizer to send it again, and make sure you copy the whole thing.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const enc=new TextEncoder(), dec=new TextDecoder();
+  function rand(n){ const a=new Uint32Array(1); crypto.getRandomValues(a); return a[0]%n; }
+  function b64u(bytes){ let s=""; bytes.forEach(b=>s+=String.fromCharCode(b)); return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
+  function unb64u(str){ str=str.replace(/-/g,"+").replace(/_/g,"/"); while(str.length%4) str+="="; const s=atob(str); return Uint8Array.from(s,c=>c.charCodeAt(0)); }
+  // Scrambled so the result can't be read from the link at a glance.
+  function seal(obj){
+    const data=enc.encode(JSON.stringify(obj)), key=new Uint8Array(8); crypto.getRandomValues(key);
+    const out=new Uint8Array(8+data.length); out.set(key);
+    data.forEach((b,i)=>{ out[8+i]=b^key[i%8]^((i*31)&255); });
+    return b64u(out);
+  }
+  function unseal(str){
+    const all=unb64u(str), key=all.slice(0,8), data=all.slice(8).map((b,i)=>b^key[i%8]^((i*31)&255));
+    return JSON.parse(dec.decode(data));
+  }
+  function store(k,v){ try{ v==null?localStorage.removeItem(k):localStorage.setItem(k,v);}catch(e){} }
+  function load(k){ try{ return localStorage.getItem(k);}catch(e){ return null; } }
+
+  const hash=location.hash.slice(1);
+  if(hash) participant(hash); else organizer();
+
+  function participant(h){
+    let d;
+    try{ d=unseal(h); if(!Array.isArray(d.p)||d.p[d.i]==null||d.p[d.t]==null||d.i===d.t) throw 0; }
+    catch(e){ $("bad").hidden=false; return; }
+    $("person").hidden=false;
+    $("hello").textContent=`Hi ${d.p[d.i]}! Tap the button to find out who you’re buying a gift for.`;
+    document.title="Secret Santa for "+d.p[d.i];
+    if(d.n){ $("pnote").hidden=false; $("pnote").textContent=d.n; }
+    $("from").textContent="From "+d.p[d.i];
+    $("drawBtn").addEventListener("click",()=>{
+      $("drawBtn").hidden=true;
+      const reel=$("reel"), strip=$("strip");
+      reel.classList.remove("closed");
+      strip.textContent="";
+      const others=d.p.map((_,k)=>k).filter(k=>k!==d.i);
+      const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const seq=[];
+      if(!reduced) for(let k=0;k<26;k++) seq.push(others[rand(others.length)]);
+      seq.push(d.t);
+      seq.forEach(k=>{ const el=document.createElement("div"); el.textContent=d.p[k]; strip.appendChild(el); });
+      strip.style.transform="translateY(0)";
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        strip.style.transition="transform 3.2s cubic-bezier(.12,.8,.18,1)";
+        strip.style.transform=`translateY(-${(seq.length-1)*64}px)`;
+      }));
+      setTimeout(()=>{ $("after").hidden=false; }, reduced?0:3300);
+    });
+  }
+
+  function organizer(){
+    $("organizer").hidden=false;
+    if(/^https?:$/.test(location.protocol)) $("base").value=location.href.split("#")[0];
+    const saved=load("ss-draw");
+    if(saved){ try{ showLinks(JSON.parse(saved)); }catch(e){ store("ss-draw",null); } }
+
+    $("make").addEventListener("click",()=>{
+      const err=$("err"); err.hidden=true;
+      const seen=new Set();
+      const people=$("people").value.split(/\n|,/).map(s=>s.trim()).filter(s=>{ const k=s.toLowerCase(); if(!s||seen.has(k)) return false; seen.add(k); return true; });
+      const base=$("base").value.trim();
+      if(people.length<3){ err.textContent="Add at least 3 different names."; err.hidden=false; return; }
+      if(!/^https?:\/\//.test(base)){ err.textContent="Add the web address where this page is hosted, starting with https://"; err.hidden=false; return; }
+      const n=people.length, perm=[...Array(n).keys()];
+      // Sattolo's algorithm: one random loop, so nobody ever draws themselves.
+      for(let i=n-1;i>0;i--){ const j=rand(i); [perm[i],perm[j]]=[perm[j],perm[i]]; }
+      const note=$("note").value.trim();
+      const draw={ base:base.split("#")[0], links: people.map((name,i)=>({ name, code: seal({p:people,i,t:perm[i],n:note}), sent:false })) };
+      store("ss-draw",JSON.stringify(draw));
+      showLinks(draw);
+    });
+
+    $("redo").addEventListener("click",()=>{
+      const r=$("redo");
+      if(r.dataset.armed){
+        store("ss-draw",null); $("out").hidden=true; $("setup").hidden=false;
+        delete r.dataset.armed; r.textContent="Start over with a new draw"; return;
+      }
+      r.dataset.armed="1";
+      r.textContent="Click again to throw away these links and draw again";
+      setTimeout(()=>{ delete r.dataset.armed; r.textContent="Start over with a new draw"; },4000);
+    });
+  }
+
+  function showLinks(draw){
+    $("setup").hidden=true; $("out").hidden=false;
+    const ul=$("links"); ul.textContent="";
+    draw.links.forEach(l=>{
+      const url=draw.base+"#"+l.code;
+      const li=document.createElement("li"); if(l.sent) li.className="sent";
+      const who=document.createElement("div"); who.className="who"; who.textContent=l.name;
+      const st=document.createElement("small"); st.textContent=l.sent?"Link copied":"Not sent yet"; who.appendChild(st);
+      const mark=()=>{ l.sent=true; li.className="sent"; st.textContent="Link copied"; store("ss-draw",JSON.stringify(draw)); };
+      li.appendChild(who);
+      if(navigator.share){
+        const sb=document.createElement("button"); sb.className="btn quiet"; sb.textContent="Share";
+        sb.addEventListener("click",async()=>{ try{ await navigator.share({title:"Secret Santa", text:`Hi ${l.name}! Here’s your Secret Santa draw:`, url}); mark(); }catch(e){} });
+        li.appendChild(sb);
+      }
+      const cb=document.createElement("button"); cb.className="btn quiet"; cb.textContent="Copy link";
+      cb.addEventListener("click",async()=>{
+        try{ await navigator.clipboard.writeText(url); }
+        catch(e){ const t=document.createElement("textarea"); t.value=url; document.body.appendChild(t); t.select(); try{document.execCommand("copy");}catch(_){} t.remove(); }
+        cb.textContent="Copied"; setTimeout(()=>{ cb.textContent="Copy link"; },1500); mark();
+      });
+      li.appendChild(cb);
+      ul.appendChild(li);
+    });
+  }
+})();
+</script>
+</body>
+</html>
