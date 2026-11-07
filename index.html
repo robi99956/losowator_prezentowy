@@ -1,19 +1,19 @@
 <!doctype html>
-<html lang="en">
+<html lang="pl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Secret Santa draw</title>
+<title>Losowanie prezentów</title>
 <meta name="robots" content="noindex">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎁</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&display=swap&subset=latin-ext" rel="stylesheet">
 <style>
 :root{
-  --bg:#E9EFEA; --surface:#F8FAF7; --ink:#14302A; --muted:#4E675E; --line:#C3D2C8;
-  --accent:#B3202C; --accent-ink:#FFFFFF; --gold:#9A6F17;
-  --slip:#FFFFFF; --slip-ink:#14302A;
+  --bg:#EEF0F5; --surface:#F9FAFC; --ink:#1D2340; --muted:#59607A; --line:#C9CEDC;
+  --accent:#5B3FD6; --accent-ink:#FFFFFF; --gold:#A87600; --stripe:rgba(91,63,214,.2);
+  --slip:#FFFFFF; --slip-ink:#1D2340;
   --display:"Caprasimo", "Cooper Black", Georgia, serif;
   --body:"Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme: light;
@@ -22,31 +22,31 @@
 }
 @media (prefers-color-scheme: dark){
   :root{
-    --bg:#0F231E; --surface:#16312A; --ink:#E7F0EA; --muted:#9BB4A9; --line:#2B4B42;
-    --accent:#E2505B; --accent-ink:#1A0A0C; --gold:#E3B557;
-    --slip:#F6F2E8; --slip-ink:#14302A;
+    --bg:#12152A; --surface:#1B1F3A; --ink:#E8EAF4; --muted:#A2A8C3; --line:#2E3456;
+    --accent:#A493FF; --accent-ink:#12152A; --gold:#F0C24B; --stripe:rgba(164,147,255,.25);
+    --slip:#F4F3FA; --slip-ink:#1D2340;
     color-scheme: dark;
   }
 }
 *,*::before,*::after{box-sizing:inherit}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased}
 .wrap{max-width:560px;margin:0 auto;padding:40px 20px 64px}
-h1{font-family:var(--display);font-weight:400;font-size:clamp(44px,12vw,72px);line-height:.95;margin:0 0 14px;letter-spacing:-.01em}
-h2{font-size:20px;font-weight:700;margin:0 0 12px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(40px,11vw,68px);line-height:1;margin:0 0 14px;letter-spacing:-.01em;overflow-wrap:anywhere}
+h2{font-size:20px;font-weight:700;margin:0 0 6px}
 .lede{color:var(--muted);margin:0 0 28px;max-width:44ch}
 section{margin-bottom:32px}
-button:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .btn{font:inherit;font-weight:700;font-size:18px;border:0;border-radius:999px;padding:16px 28px;background:var(--accent);color:var(--accent-ink);cursor:pointer;width:100%}
-.btn:disabled{opacity:.4;cursor:not-allowed}
 .btn.quiet{background:transparent;color:var(--ink);border:1.5px solid var(--line);font-size:15px;padding:9px 16px;width:auto;font-weight:600}
 .btn.quiet:hover{border-color:var(--ink)}
 .hint{font-size:14px;color:var(--muted);margin:10px 0 0}
 .err{color:var(--accent);font-weight:600}
 label{display:block;font-weight:600;font-size:15px;margin:16px 0 6px}
 label small{font-weight:400;color:var(--muted)}
-textarea,input[type=text]{width:100%;font:inherit;font-size:16px;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
+textarea,input[type=text],select{width:100%;font:inherit;font-size:16px;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
 textarea{min-height:200px;resize:vertical}
 .actions{margin-top:20px}
+.meta{color:var(--muted);margin:0 0 16px}
 .links{list-style:none;padding:0;margin:0 0 16px;border-top:1px solid var(--line)}
 .links li{display:flex;align-items:center;gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}
 .links .who{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -61,36 +61,45 @@ textarea{min-height:200px;resize:vertical}
 .tag .for,.tag .from{font-size:15px;margin:0 0 6px;opacity:.72}
 .tag .from{margin:10px 0 0;font-size:14px}
 .reel{height:64px;overflow:hidden;border-radius:6px}
-.reel.closed{background:repeating-linear-gradient(-45deg,rgba(179,32,44,.22) 0 10px,transparent 10px 20px)}
+.reel.closed{background:repeating-linear-gradient(-45deg,var(--stripe) 0 10px,transparent 10px 20px)}
 .reel.closed .strip{visibility:hidden}
 .strip{will-change:transform}
 .strip div{height:64px;line-height:64px;font-family:var(--display);font-size:clamp(32px,9vw,46px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .note{color:var(--muted);margin:-12px 0 24px}
+.stamp{font-size:14px;color:var(--muted);margin:22px 0 0;padding-top:14px;border-top:1px solid var(--line)}
 [hidden]{display:none!important}
 @media (prefers-reduced-motion: reduce){.strip{transition:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Secret Santa</h1>
+  <h1 id="title" data-i18n="title">Losowanie prezentów</h1>
 
   <div id="organizer" hidden>
-    <p class="lede">Make the draw here, then send each person their own private link. Nobody needs an account, and you won’t see who anyone got.</p>
+    <p class="lede" data-i18n="orgLede"></p>
     <section id="setup">
-      <label for="people">Participants <small>(one name per line, at least 3)</small></label>
-      <textarea id="people" placeholder="Anna&#10;Tomek&#10;Kasia&#10;Piotr"></textarea>
-      <label for="note">Note for everyone <small>(optional, e.g. budget and date)</small></label>
-      <input type="text" id="note" maxlength="200" placeholder="Budget 100 zł, exchange on 24 December">
-      <label for="base">Page address <small>(where this page is hosted)</small></label>
-      <input type="text" id="base" placeholder="https://your-site.netlify.app/">
-      <div class="actions"><button class="btn" id="make">Make the draw</button></div>
+      <label for="lang" data-i18n="langLabel"></label>
+      <select id="lang">
+        <option value="pl">Polski</option>
+        <option value="en">English</option>
+      </select>
+      <label for="occasion"><span data-i18n="occLabel"></span> <small data-i18n="occHint"></small></label>
+      <input type="text" id="occasion" maxlength="80" data-i18n-ph="occPh">
+      <label for="people"><span data-i18n="peopleLabel"></span> <small data-i18n="peopleHint"></small></label>
+      <textarea id="people" data-i18n-ph="peoplePh"></textarea>
+      <label for="note"><span data-i18n="noteLabel"></span> <small data-i18n="noteHint"></small></label>
+      <input type="text" id="note" maxlength="200" data-i18n-ph="notePh">
+      <label for="base"><span data-i18n="baseLabel"></span> <small data-i18n="baseHint"></small></label>
+      <input type="text" id="base" placeholder="https://your-username.github.io/gift-draw/">
+      <div class="actions"><button class="btn" id="make" data-i18n="make"></button></div>
       <p class="err" id="err" hidden></p>
     </section>
     <section id="out" hidden>
-      <h2>Send these links</h2>
-      <div class="warn">Send each person only their own link, and don’t open other people’s links yourself, or you’ll see who they drew. Your own link is in the list too.</div>
+      <h2 data-i18n="sendTitle"></h2>
+      <p class="meta" id="meta"></p>
+      <div class="warn" data-i18n="warn"></div>
       <ul class="links" id="links"></ul>
-      <button class="linkbtn" id="redo">Start over with a new draw</button>
+      <button class="linkbtn" id="redo" data-i18n="redo"></button>
     </section>
   </div>
 
@@ -99,23 +108,96 @@ textarea{min-height:200px;resize:vertical}
     <p class="note" id="pnote" hidden></p>
     <div class="tagwrap">
       <div class="tag">
-        <p class="for">You’re buying a gift for</p>
+        <p class="for" data-i18n="forLine"></p>
         <div class="reel closed" id="reel"><div class="strip" id="strip"></div></div>
         <p class="from" id="from"></p>
       </div>
     </div>
-    <button class="btn" id="drawBtn">Draw my person</button>
-    <p class="hint" id="after" hidden>Keep it to yourself. This link always shows the same person, so you can open it again any time.</p>
+    <button class="btn" id="drawBtn" data-i18n="drawBtn"></button>
+    <p class="hint" id="after" hidden data-i18n="after"></p>
+    <p class="stamp" id="stamp" hidden></p>
   </div>
 
   <div id="bad" hidden>
-    <p class="lede">This link looks incomplete. Ask the organizer to send it again, and make sure you copy the whole thing.</p>
+    <p class="lede" data-i18n="bad"></p>
   </div>
 </div>
 
 <script>
 (function(){
+  const T={
+    pl:{
+      title:"Losowanie prezentów",
+      orgLede:"Zrób losowanie tutaj, a potem wyślij każdej osobie jej prywatny link. Nikt nie potrzebuje konta, a Ty nie zobaczysz, kto kogo wylosował.",
+      langLabel:"Język strony i linków",
+      occLabel:"Okazja", occHint:"(opcjonalnie)", occPh:"Urodziny Ani albo wymiana prezentów w biurze",
+      peopleLabel:"Uczestnicy", peopleHint:"(jedno imię w linii, co najmniej 3)", peoplePh:"Anna\nTomek\nKasia\nPiotr",
+      noteLabel:"Wiadomość dla wszystkich", noteHint:"(opcjonalnie, np. budżet i data)", notePh:"Budżet 100 zł, wymiana prezentów w piątek",
+      baseLabel:"Adres strony", baseHint:"(gdzie ta strona jest opublikowana)",
+      make:"Zrób losowanie",
+      errPeople:"Dodaj co najmniej 3 różne imiona.",
+      errBase:"Podaj adres, pod którym jest ta strona, zaczynający się od https://",
+      sendTitle:"Wyślij te linki",
+      metaDate:"Losowanie z {date}",
+      metaBoth:"{occ}, losowanie z {date}",
+      warn:"Wyślij każdej osobie tylko jej własny link i nie otwieraj cudzych linków, bo zobaczysz, kogo wylosowali. Twój własny link też jest na liście.",
+      notSent:"Jeszcze nie wysłano", sent:"Link skopiowany",
+      share:"Udostępnij", copy:"Kopiuj link", copied:"Skopiowano",
+      shareText:"Cześć, {name}! Oto Twój link do losowania prezentów:",
+      shareTextOcc:"Cześć, {name}! Oto Twój link do losowania ({occ}):",
+      redo:"Zacznij od nowa z nowym losowaniem",
+      redoArmed:"Kliknij jeszcze raz, żeby wyrzucić te linki i losować od nowa",
+      hello:"Cześć, {name}! Kliknij przycisk, żeby sprawdzić, komu kupujesz prezent.",
+      forLine:"Kupujesz prezent dla:",
+      from:"Od: {name}",
+      drawBtn:"Losuj moją osobę",
+      after:"Zachowaj to dla siebie. Ten link zawsze pokazuje tę samą osobę, więc możesz go otworzyć w każdej chwili.",
+      stamp:"Losowanie z {date}. Jeśli dostaniesz nowszy link, ważny jest ten nowszy.",
+      docTitle:"{title}: {name}",
+      bad:"Ten link wygląda na niekompletny. Poproś organizatora o ponowne wysłanie i skopiuj go w całości."
+    },
+    en:{
+      title:"Gift exchange draw",
+      orgLede:"Make the draw here, then send each person their own private link. Nobody needs an account, and you won’t see who anyone got.",
+      langLabel:"Language of the page and links",
+      occLabel:"Occasion", occHint:"(optional)", occPh:"Anna’s birthday or the office gift swap",
+      peopleLabel:"Participants", peopleHint:"(one name per line, at least 3)", peoplePh:"Anna\nTom\nKate\nPeter",
+      noteLabel:"Note for everyone", noteHint:"(optional, e.g. budget and date)", notePh:"Budget £20, gifts exchanged on Friday",
+      baseLabel:"Page address", baseHint:"(where this page is hosted)",
+      make:"Make the draw",
+      errPeople:"Add at least 3 different names.",
+      errBase:"Add the web address where this page is hosted, starting with https://",
+      sendTitle:"Send these links",
+      metaDate:"Draw made on {date}",
+      metaBoth:"{occ}, draw made on {date}",
+      warn:"Send each person only their own link, and don’t open other people’s links yourself, or you’ll see who they drew. Your own link is in the list too.",
+      notSent:"Not sent yet", sent:"Link copied",
+      share:"Share", copy:"Copy link", copied:"Copied",
+      shareText:"Hi {name}! Here’s your link for the gift exchange draw:",
+      shareTextOcc:"Hi {name}! Here’s your gift draw for {occ}:",
+      redo:"Start over with a new draw",
+      redoArmed:"Click again to throw away these links and draw again",
+      hello:"Hi {name}! Tap the button to find out who you’re buying a gift for.",
+      forLine:"You’re buying a gift for",
+      from:"From {name}",
+      drawBtn:"Draw my person",
+      after:"Keep it to yourself. This link always shows the same person, so you can open it again any time.",
+      stamp:"Draw made on {date}. If you get a newer link, the newer one counts.",
+      docTitle:"{title} for {name}",
+      bad:"This link looks incomplete. Ask the organizer to send it again, and make sure you copy the whole thing."
+    }
+  };
+  let L = /^pl\b/i.test(navigator.language||"") ? "pl" : "en";
   const $=id=>document.getElementById(id);
+  function t(k,vars){ let s=(T[L]&&T[L][k])||T.en[k]||""; if(vars) for(const v in vars) s=s.split("{"+v+"}").join(vars[v]); return s; }
+  function fmtDate(ms){ try{ return new Intl.DateTimeFormat(L==="pl"?"pl-PL":"en-GB",{dateStyle:"long",timeStyle:"short"}).format(new Date(ms)); }catch(e){ return new Date(ms).toLocaleString(); } }
+  function applyLang(){
+    document.documentElement.lang=L;
+    document.querySelectorAll("[data-i18n]").forEach(el=>{ el.textContent=t(el.dataset.i18n); });
+    document.querySelectorAll("[data-i18n-ph]").forEach(el=>{ el.placeholder=t(el.dataset.i18nPh); });
+    if(!location.hash) document.title=t("title");
+  }
+
   const enc=new TextEncoder(), dec=new TextDecoder();
   function rand(n){ const a=new Uint32Array(1); crypto.getRandomValues(a); return a[0]%n; }
   function b64u(bytes){ let s=""; bytes.forEach(b=>s+=String.fromCharCode(b)); return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
@@ -131,21 +213,34 @@ textarea{min-height:200px;resize:vertical}
     const all=unb64u(str), key=all.slice(0,8), data=all.slice(8).map((b,i)=>b^key[i%8]^((i*31)&255));
     return JSON.parse(dec.decode(data));
   }
+  // Readable version stamp at the front of each link, e.g. v20261107-1432
+  function stamp(ms){ const d=new Date(ms), p=n=>String(n).padStart(2,"0");
+    return "v"+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+"-"+p(d.getHours())+p(d.getMinutes()); }
   function store(k,v){ try{ v==null?localStorage.removeItem(k):localStorage.setItem(k,v);}catch(e){} }
   function load(k){ try{ return localStorage.getItem(k);}catch(e){ return null; } }
 
+  let current=null;
   const hash=location.hash.slice(1);
   if(hash) participant(hash); else organizer();
 
+  // ---------------- participant ----------------
   function participant(h){
     let d;
-    try{ d=unseal(h); if(!Array.isArray(d.p)||d.p[d.i]==null||d.p[d.t]==null||d.i===d.t) throw 0; }
-    catch(e){ $("bad").hidden=false; return; }
+    try{
+      const code=h.includes(".") ? h.slice(h.lastIndexOf(".")+1) : h;
+      d=unseal(code);
+      if(!Array.isArray(d.p)||d.p[d.i]==null||d.p[d.t]==null||d.i===d.t) throw 0;
+    }catch(e){ applyLang(); $("bad").hidden=false; return; }
+    if(d.l && T[d.l]) L=d.l;
+    applyLang();
+    const name=d.p[d.i];
+    if(d.o) $("title").textContent=d.o;
+    document.title=t("docTitle",{title:d.o||t("title"),name});
     $("person").hidden=false;
-    $("hello").textContent=`Hi ${d.p[d.i]}! Tap the button to find out who you’re buying a gift for.`;
-    document.title="Secret Santa for "+d.p[d.i];
+    $("hello").textContent=t("hello",{name});
     if(d.n){ $("pnote").hidden=false; $("pnote").textContent=d.n; }
-    $("from").textContent="From "+d.p[d.i];
+    $("from").textContent=t("from",{name});
+    if(d.v){ $("stamp").hidden=false; $("stamp").textContent=t("stamp",{date:fmtDate(d.v)}); }
     $("drawBtn").addEventListener("click",()=>{
       $("drawBtn").hidden=true;
       const reel=$("reel"), strip=$("strip");
@@ -166,60 +261,72 @@ textarea{min-height:200px;resize:vertical}
     });
   }
 
+  // ---------------- organizer ----------------
   function organizer(){
     $("organizer").hidden=false;
     if(/^https?:$/.test(location.protocol)) $("base").value=location.href.split("#")[0];
     const saved=load("ss-draw");
-    if(saved){ try{ showLinks(JSON.parse(saved)); }catch(e){ store("ss-draw",null); } }
+    if(saved){ try{ current=JSON.parse(saved); if(current.lang && T[current.lang]) L=current.lang; }catch(e){ current=null; store("ss-draw",null); } }
+    $("lang").value=L;
+    applyLang();
+    if(current) showLinks(current);
+
+    $("lang").addEventListener("change",e=>{ L=e.target.value; applyLang(); });
 
     $("make").addEventListener("click",()=>{
       const err=$("err"); err.hidden=true;
       const seen=new Set();
       const people=$("people").value.split(/\n|,/).map(s=>s.trim()).filter(s=>{ const k=s.toLowerCase(); if(!s||seen.has(k)) return false; seen.add(k); return true; });
       const base=$("base").value.trim();
-      if(people.length<3){ err.textContent="Add at least 3 different names."; err.hidden=false; return; }
-      if(!/^https?:\/\//.test(base)){ err.textContent="Add the web address where this page is hosted, starting with https://"; err.hidden=false; return; }
+      if(people.length<3){ err.textContent=t("errPeople"); err.hidden=false; return; }
+      if(!/^https?:\/\//.test(base)){ err.textContent=t("errBase"); err.hidden=false; return; }
       const n=people.length, perm=[...Array(n).keys()];
       // Sattolo's algorithm: one random loop, so nobody ever draws themselves.
       for(let i=n-1;i>0;i--){ const j=rand(i); [perm[i],perm[j]]=[perm[j],perm[i]]; }
-      const note=$("note").value.trim();
-      const draw={ base:base.split("#")[0], links: people.map((name,i)=>({ name, code: seal({p:people,i,t:perm[i],n:note}), sent:false })) };
-      store("ss-draw",JSON.stringify(draw));
-      showLinks(draw);
+      const note=$("note").value.trim(), occ=$("occasion").value.trim(), v=Date.now();
+      current={ base:base.split("#")[0], lang:L, occasion:occ, v, stamp:stamp(v),
+        links: people.map((name,i)=>({ name, code: seal({p:people,i,t:perm[i],n:note,o:occ,v,l:L}), sent:false })) };
+      store("ss-draw",JSON.stringify(current));
+      showLinks(current);
     });
 
     $("redo").addEventListener("click",()=>{
       const r=$("redo");
       if(r.dataset.armed){
-        store("ss-draw",null); $("out").hidden=true; $("setup").hidden=false;
-        delete r.dataset.armed; r.textContent="Start over with a new draw"; return;
+        store("ss-draw",null); current=null; $("out").hidden=true; $("setup").hidden=false;
+        delete r.dataset.armed; r.textContent=t("redo"); return;
       }
-      r.dataset.armed="1";
-      r.textContent="Click again to throw away these links and draw again";
-      setTimeout(()=>{ delete r.dataset.armed; r.textContent="Start over with a new draw"; },4000);
+      r.dataset.armed="1"; r.textContent=t("redoArmed");
+      setTimeout(()=>{ delete r.dataset.armed; r.textContent=t("redo"); },4000);
     });
   }
 
   function showLinks(draw){
     $("setup").hidden=true; $("out").hidden=false;
+    const date=draw.v?fmtDate(draw.v):"";
+    $("meta").hidden=!date;
+    $("meta").textContent = draw.occasion ? t("metaBoth",{occ:draw.occasion,date}) : t("metaDate",{date});
     const ul=$("links"); ul.textContent="";
     draw.links.forEach(l=>{
-      const url=draw.base+"#"+l.code;
+      const url=draw.base+"#"+(draw.stamp?draw.stamp+".":"")+l.code;
       const li=document.createElement("li"); if(l.sent) li.className="sent";
       const who=document.createElement("div"); who.className="who"; who.textContent=l.name;
-      const st=document.createElement("small"); st.textContent=l.sent?"Link copied":"Not sent yet"; who.appendChild(st);
-      const mark=()=>{ l.sent=true; li.className="sent"; st.textContent="Link copied"; store("ss-draw",JSON.stringify(draw)); };
+      const st=document.createElement("small"); st.textContent=l.sent?t("sent"):t("notSent"); who.appendChild(st);
+      const mark=()=>{ l.sent=true; li.className="sent"; st.textContent=t("sent"); store("ss-draw",JSON.stringify(draw)); };
       li.appendChild(who);
       if(navigator.share){
-        const sb=document.createElement("button"); sb.className="btn quiet"; sb.textContent="Share";
-        sb.addEventListener("click",async()=>{ try{ await navigator.share({title:"Secret Santa", text:`Hi ${l.name}! Here’s your Secret Santa draw:`, url}); mark(); }catch(e){} });
+        const sb=document.createElement("button"); sb.className="btn quiet"; sb.textContent=t("share");
+        sb.addEventListener("click",async()=>{
+          const text=draw.occasion?t("shareTextOcc",{name:l.name,occ:draw.occasion}):t("shareText",{name:l.name});
+          try{ await navigator.share({title:draw.occasion||t("title"), text, url}); mark(); }catch(e){}
+        });
         li.appendChild(sb);
       }
-      const cb=document.createElement("button"); cb.className="btn quiet"; cb.textContent="Copy link";
+      const cb=document.createElement("button"); cb.className="btn quiet"; cb.textContent=t("copy");
       cb.addEventListener("click",async()=>{
         try{ await navigator.clipboard.writeText(url); }
-        catch(e){ const t=document.createElement("textarea"); t.value=url; document.body.appendChild(t); t.select(); try{document.execCommand("copy");}catch(_){} t.remove(); }
-        cb.textContent="Copied"; setTimeout(()=>{ cb.textContent="Copy link"; },1500); mark();
+        catch(e){ const ta=document.createElement("textarea"); ta.value=url; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy");}catch(_){} ta.remove(); }
+        cb.textContent=t("copied"); setTimeout(()=>{ cb.textContent=t("copy"); },1500); mark();
       });
       li.appendChild(cb);
       ul.appendChild(li);
