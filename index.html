@@ -64,12 +64,10 @@ textarea{min-height:200px;resize:vertical}
 .reel{height:64px;overflow:hidden;border-radius:6px}
 .reel.closed{background:repeating-linear-gradient(-45deg,var(--stripe) 0 10px,transparent 10px 20px)}
 .reel.closed .strip{visibility:hidden}
-.strip{will-change:transform}
 .strip div{height:64px;line-height:64px;font-family:var(--display);font-size:clamp(32px,9vw,46px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .note{color:var(--muted);margin:-12px 0 24px}
 .stamp{font-size:14px;color:var(--muted);margin:22px 0 0;padding-top:14px;border-top:1px solid var(--line)}
 [hidden]{display:none!important}
-@media (prefers-reduced-motion: reduce){.strip{transition:none!important}}
 </style>
 </head>
 <body>
@@ -148,10 +146,10 @@ textarea{min-height:200px;resize:vertical}
       shareTextOcc:"Cześć, {name}! Oto Twój link do losowania ({occ}):",
       redo:"Zacznij od nowa z nowym losowaniem",
       redoArmed:"Kliknij jeszcze raz, żeby wyrzucić te linki i losować od nowa",
-      hello:"Cześć, {name}! Kliknij przycisk, żeby sprawdzić, komu kupujesz prezent.",
+      hello:"Cześć, {name}! Losowanie już się odbyło. Kliknij przycisk, żeby zobaczyć, komu kupujesz prezent.",
       forLine:"Kupujesz prezent dla:",
       from:"Od: {name}",
-      drawBtn:"Losuj moją osobę",
+      drawBtn:"Pokaż wynik",
       after:"Zachowaj to dla siebie. Ten link zawsze pokazuje tę samą osobę, więc możesz go otworzyć w każdej chwili.",
       stamp:"Losowanie z {date}. Jeśli dostaniesz nowszy link, ważny jest ten nowszy.",
       docTitle:"{title}: {name}",
@@ -178,10 +176,10 @@ textarea{min-height:200px;resize:vertical}
       shareTextOcc:"Hi {name}! Here’s your gift draw for {occ}:",
       redo:"Start over with a new draw",
       redoArmed:"Click again to throw away these links and draw again",
-      hello:"Hi {name}! Tap the button to find out who you’re buying a gift for.",
+      hello:"Hi {name}! The draw has already been made. Tap the button to see who you’re buying a gift for.",
       forLine:"You’re buying a gift for",
       from:"From {name}",
-      drawBtn:"Draw my person",
+      drawBtn:"Show result",
       after:"Keep it to yourself. This link always shows the same person, so you can open it again any time.",
       stamp:"Draw made on {date}. If you get a newer link, the newer one counts.",
       docTitle:"{title} for {name}",
@@ -243,22 +241,12 @@ textarea{min-height:200px;resize:vertical}
     $("from").textContent=t("from",{name});
     if(d.v){ $("stamp").hidden=false; $("stamp").textContent=t("stamp",{date:fmtDate(d.v)}); }
     $("drawBtn").addEventListener("click",()=>{
+      // The result was fixed when the organizer made the draw; this only reveals it.
       $("drawBtn").hidden=true;
-      const reel=$("reel"), strip=$("strip");
-      reel.classList.remove("closed");
-      strip.textContent="";
-      const others=d.p.map((_,k)=>k).filter(k=>k!==d.i);
-      const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const seq=[];
-      if(!reduced) for(let k=0;k<26;k++) seq.push(others[rand(others.length)]);
-      seq.push(d.t);
-      seq.forEach(k=>{ const el=document.createElement("div"); el.textContent=d.p[k]; strip.appendChild(el); });
-      strip.style.transform="translateY(0)";
-      requestAnimationFrame(()=>requestAnimationFrame(()=>{
-        strip.style.transition="transform 3.2s cubic-bezier(.12,.8,.18,1)";
-        strip.style.transform=`translateY(-${(seq.length-1)*64}px)`;
-      }));
-      setTimeout(()=>{ $("after").hidden=false; }, reduced?0:3300);
+      const strip=$("strip"); strip.textContent="";
+      const el=document.createElement("div"); el.textContent=d.p[d.t]; strip.appendChild(el);
+      $("reel").classList.remove("closed");
+      $("after").hidden=false;
     });
   }
 
